@@ -224,7 +224,7 @@ HTMLWidgets.widget({
 
         g.selectAll(".child")
             .data(function(d) { return d._children || [d]; })
-          .enter().append("rect")
+            .enter().append("rect")
             .attr("class", "child")
             .call(rect);
 
@@ -235,20 +235,21 @@ HTMLWidgets.widget({
               communicateClick(d);
             })
           .append("title")
-            .text(function(d) { return formatNumber(d[valueField]); });
+            .text(function(d) { return formatNumber(d[valueField]); })
 
         g.append("text")
             .attr("dy", ".75em")
             .text(function(d) { return d[celltext]; })
-            .call(text);
+            .call(text, true)
+            .call(wrap, 50, "display");
 
         function transition(d) {
           if (transitioning || !d) return;
           transitioning = true;
 
           var g2 = display(d),
-              t1 = g1.transition().duration(750),
-              t2 = g2.transition().duration(750);
+              t1 = g1.transition().duration(250),
+              t2 = g2.transition().duration(250);
 
           // Update the domain only after entering new elements.
           xscale.domain([d.x, d.x + d.dx]);
@@ -264,10 +265,29 @@ HTMLWidgets.widget({
           g2.selectAll("text").style("fill-opacity", 0);
 
           // Transition to the new view.
-          t1.selectAll("text").call(text).style("fill-opacity", 0);
-          t2.selectAll("text").call(text).style("fill-opacity", 1);
+          t1.selectAll("text")
+            .call(text)
+            .style("fill-opacity", 0);
+          t2.selectAll("text")
+            .call(text)
+            .style("fill-opacity", 1);
           t1.selectAll("rect").call(rect);
           t2.selectAll("rect").call(rect);
+
+          t1.selectAll("text").call(wrap, 50, "t1");
+          t2.selectAll("text").call(wrap, 50, "t2");
+
+          var t1text = t1.selectAll("text");
+          console.log("t1text")
+          console.log(t1text)
+
+          var t2text = t2.selectAll("text");
+          console.log("t2text")
+          console.log(t1text)
+
+          var tspans = d3.selectAll("tspan");
+          console.log("tspans")
+          console.log(tspans)
 
           // Remove the old node when the transition is finished.
           t1.remove().each("end", function() {
@@ -301,6 +321,42 @@ HTMLWidgets.widget({
             });
       }
 
+      function wrap(text, width, from) {
+        console.log("calling from " + from);
+        text.each(function () {
+            var text = d3.select(this);
+
+            var words = text.data()[0][celltext].split(/\s+/).reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, // ems
+                x = text.attr("x"),
+                y = text.attr("y"),
+                dy = parseFloat(text.attr("dy")),
+                tspan = text.text(null)
+                            .append("tspan")
+                            .attr("x", x)
+                            .attr("y", y)
+                            .attr("dy", dy + "em");
+
+            while (word = words.pop()) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan")
+                                .attr("x", x)
+                                .attr("y", y)
+                                .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                                .text(word);
+                }
+            }
+        });
+      }
+
       function rect(rect) {
         rect.attr("x", function(d) { return xscale(d.x); })
             .attr("y", function(d) { return yscale(d.y); })
@@ -327,6 +383,8 @@ HTMLWidgets.widget({
           leveltwo( d.parent ) :
           d;
       }
+
+
 
     }
 

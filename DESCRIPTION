@@ -27,18 +27,19 @@ Authors@R: c(
       )
     )
 Maintainer: Kent Russell <kent.russell@timelyportfolio.com>
-Description: Make interactive d3.js treemaps in R with the convenience and infrastructure
-              of an htmlwidget.
+Description: Make interactive d3.js treemaps in R with the convenience and
+    infrastructure of an htmlwidget.
 License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
-  data.tree,
-  grid,
-  gridSVG,
-  htmlwidgets,
-  jsonlite,
-  treemap,
-  XML
+    data.tree,
+    grid,
+    gridSVG,
+    htmlwidgets,
+    jsonlite,
+    treemap,
+    XML
 Suggests:
-  knitr
+    knitr
 VignetteBuilder: knitr
+RoxygenNote: 5.0.1.9000
